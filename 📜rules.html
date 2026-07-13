@@ -32,6 +32,17 @@
     overflow-x:hidden;
   }
 
+  /* Scrollbar native masquée — le défilement (souris, molette, tactile) reste actif */
+  html{
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* Ancien Edge / IE */
+  }
+  html::-webkit-scrollbar{      /* Chrome, Safari, Edge Chromium */
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   @font-face{
     font-family:'Space Grotesk';
     src: local('Space Grotesk');
@@ -289,6 +300,81 @@
   @media (prefers-reduced-motion: reduce){
     .nebula, .stars, .grid{ animation: none; }
   }
+
+  /* --- Indicateur de défilement sur mesure --- */
+  .scroll-indicator{
+    position: fixed;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 220px;
+    width: 32px;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content: space-between;
+    z-index: 30;
+  }
+
+  .scroll-indicator .cap{
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    transition: opacity .2s ease;
+  }
+
+  .scroll-track{
+    position: relative;
+    width: 6px;
+    flex: 1;
+    margin: 10px 0;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: visible;
+    cursor: pointer;
+  }
+
+  .scroll-fill{
+    position: absolute;
+    top:0; left:0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(180deg, var(--accent), rgba(142,203,255,0.25));
+    border-radius: 3px;
+    transition: height .12s linear;
+    pointer-events: none;
+  }
+
+  .scroll-track.dragging .scroll-fill{
+    transition: none;
+  }
+
+  .scroll-index{
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--ink);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 999px;
+    min-width: 34px;
+    text-align:center;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .scroll-index[contenteditable="true"]{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    cursor: text;
+  }
+
+  @media (max-width: 640px){
+    .scroll-indicator{ display:none; } /* sur mobile, la barre native suffit */
+  }
 </style>
 </head>
 <body>
@@ -303,22 +389,22 @@
   <h1>Règlement</h1>
   <p class="subtitle">Merci de lire l'ensemble des règles avant de participer. Elles s'appliquent à tous les membres, sans exception.</p>
 
-  <section class="rule-block">
+  <section class="rule-block" id="rule-01" data-index="01">
     <h2><span class="tag">01</span> Respect</h2>
     <p>Aucune insulte, harcèlement ou discrimination ne sera toléré, que ce soit envers un membre ou un membre du staff. Les désaccords se règlent avec calme, jamais par l'agressivité.</p>
   </section>
 
-  <section class="rule-block">
+  <section class="rule-block" id="rule-02" data-index="02">
     <h2><span class="tag">02</span> Contenu partagé</h2>
     <p>Les contenus choquants, NSFW ou illégaux sont interdits dans tous les salons. Cela inclut les images, vidéos, liens et messages vocaux.</p>
   </section>
 
-  <section class="rule-block">
+  <section class="rule-block" id="rule-03" data-index="03">
     <h2><span class="tag">03</span> Publicité</h2>
     <p>La publicité pour d'autres serveurs, chaînes ou services n'est autorisée que dans le salon prévu à cet effet, et uniquement avec l'accord du staff.</p>
   </section>
 
-  <section class="rule-block">
+  <section class="rule-block" id="rule-04" data-index="04">
     <h2><span class="tag">04</span> Liens externes</h2>
     <p>Un lien peut être partagé s'il reste pertinent avec la discussion. Exemple de ressource officielle du serveur :
       <a href="https://discord.com" class="rule-link">discord.com</a>.
@@ -326,7 +412,7 @@
     </p>
   </section>
 
-  <section class="rule-block">
+  <section class="rule-block" id="rule-05" data-index="05">
     <h2><span class="tag">05</span> Sanctions</h2>
     <ul>
       <li>1er avertissement : rappel à l'ordre</li>
@@ -336,6 +422,14 @@
   </section>
 
   <footer class="note">En restant sur ce serveur, vous acceptez ce règlement.</footer>
+</div>
+
+<div class="scroll-indicator" aria-hidden="true">
+  <span class="cap">HAUT</span>
+  <div class="scroll-track" id="scrollTrack">
+    <div class="scroll-fill" id="scrollFill"></div>
+  </div>
+  <span class="scroll-index" id="scrollIndex" tabindex="0" title="Double-clic pour aller directement à une règle">01</span>
 </div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -397,6 +491,118 @@
 
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+})();
+
+// --- Indicateur de défilement personnalisé ---
+(function(){
+  var fill = document.getElementById('scrollFill');
+  var track = document.getElementById('scrollTrack');
+  var indexLabel = document.getElementById('scrollIndex');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.rule-block[data-index]'));
+  var isDragging = false;
+
+  function updateProgress(){
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    var ratio = maxScroll > 0 ? (scrollTop / maxScroll) : 0;
+    fill.style.height = Math.min(100, Math.max(0, ratio * 100)) + '%';
+  }
+
+  function updateActiveSection(){
+    if(document.activeElement === indexLabel) return; // ne pas écraser pendant la saisie
+    var current = sections[0];
+    var viewportMiddle = window.innerHeight / 2;
+
+    sections.forEach(function(sec){
+      var rect = sec.getBoundingClientRect();
+      if(rect.top <= viewportMiddle){
+        current = sec;
+      }
+    });
+
+    if(current){
+      indexLabel.textContent = current.getAttribute('data-index');
+    }
+  }
+
+  function onScroll(){
+    updateProgress();
+    updateActiveSection();
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // --- Barre "scrubber" : clic ou glisser pour défiler comme une barre de film ---
+  function scrollFromPointer(clientY, smooth){
+    var rect = track.getBoundingClientRect();
+    var ratio = (clientY - rect.top) / rect.height;
+    ratio = Math.min(1, Math.max(0, ratio));
+    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: ratio * maxScroll, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  track.addEventListener('mousedown', function(e){
+    isDragging = true;
+    track.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    scrollFromPointer(e.clientY, false);
+  });
+
+  window.addEventListener('mousemove', function(e){
+    if(isDragging){
+      scrollFromPointer(e.clientY, false);
+    }
+  });
+
+  window.addEventListener('mouseup', function(){
+    if(isDragging){
+      isDragging = false;
+      track.classList.remove('dragging');
+      document.body.style.userSelect = '';
+    }
+  });
+
+  // --- Saisie directe du numéro de règle sur double-clic ---
+  function jumpToRule(rawValue){
+    var value = rawValue.trim().replace(/[^0-9]/g, '');
+    if(!value) return false;
+    var padded = value.length === 1 ? '0' + value : value;
+    var target = sections.filter(function(sec){
+      return sec.getAttribute('data-index') === padded;
+    })[0];
+    if(target){
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
+    }
+    return false;
+  }
+
+  indexLabel.addEventListener('dblclick', function(){
+    indexLabel.setAttribute('contenteditable', 'true');
+    indexLabel.focus();
+    var range = document.createRange();
+    range.selectNodeContents(indexLabel);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  indexLabel.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      indexLabel.blur();
+    }
+  });
+
+  indexLabel.addEventListener('blur', function(){
+    var success = jumpToRule(indexLabel.textContent);
+    indexLabel.removeAttribute('contenteditable');
+    if(!success){
+      updateActiveSection(); // revient au numéro réel si la saisie était invalide
+    }
   });
 })();
 .
