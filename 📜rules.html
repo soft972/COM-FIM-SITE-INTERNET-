@@ -599,10 +599,11 @@
 
   indexLabel.addEventListener('blur', function(){
     var success = jumpToRule(indexLabel.textContent);
-    indexLabel.removeAttribute('contenteditable');
+    indexLabel.removeAttribute('contenteditable'); // eeeee
     if(!success){
       updateActiveSection(); // revient au numéro réel si la saisie était invalide
     }
   });
 })();
+        
 .
