@@ -1,0 +1,399 @@
+1 / HTML /
+  <!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Règlement du serveur</title>
+<style>
+  :root{
+    --bg-void: #05050a;
+    --bg-deep: #0a0a14;
+    --grid-line: rgba(255,255,255,0.05);
+    --grid-line-strong: rgba(255,255,255,0.09);
+    --ink: #e8e9ee;
+    --ink-dim: #9a9ba8;
+    --accent: #8ecbff;
+    --accent-soft: rgba(142,203,255,0.12);
+    --border: rgba(255,255,255,0.08);
+    --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+    --font-body: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--bg-void);
+    color: var(--ink);
+    font-family: var(--font-body);
+    min-height:100%;
+    overflow-x:hidden;
+  }
+
+  @font-face{
+    font-family:'Space Grotesk';
+    src: local('Space Grotesk');
+  }
+
+  /* --- Fond : quadrillage + nébuleuse animée --- */
+  .stage{
+    position: fixed;
+    inset:0;
+    z-index:-3;
+    background: var(--bg-void);
+  }
+
+  .nebula{
+    position: fixed;
+    inset: -20%;
+    z-index:-2;
+    background:
+      radial-gradient(45% 35% at 18% 22%, rgba(94,120,255,0.16), transparent 60%),
+      radial-gradient(38% 30% at 82% 70%, rgba(142,203,255,0.13), transparent 60%),
+      radial-gradient(30% 40% at 60% 15%, rgba(180,120,255,0.10), transparent 60%);
+    filter: blur(10px);
+    animation: drift 34s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift{
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(-2%, 3%) scale(1.06); }
+    100% { transform: translate(3%, -2%) scale(1.02); }
+  }
+
+  .stars{
+    position: fixed;
+    inset:0;
+    z-index:-2;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0, transparent 100%),
+      radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,0.5) 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,0.45) 0, transparent 100%),
+      radial-gradient(1px 1px at 65% 15%, rgba(255,255,255,0.4) 0, transparent 100%),
+      radial-gradient(1px 1px at 25% 55%, rgba(255,255,255,0.5) 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 90% 30%, rgba(255,255,255,0.4) 0, transparent 100%),
+      radial-gradient(1px 1px at 50% 45%, rgba(255,255,255,0.35) 0, transparent 100%);
+    background-repeat: repeat;
+    background-size: 600px 600px;
+    animation: twinkle 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle{
+    0%   { opacity:.5; }
+    100% { opacity:1; }
+  }
+
+  .grid{
+    position: fixed;
+    inset:0;
+    z-index:-1;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(120% 100% at 50% 0%, black 40%, transparent 92%);
+            mask-image: radial-gradient(120% 100% at 50% 0%, black 40%, transparent 92%);
+    animation: gridshift 22s linear infinite;
+  }
+
+  @keyframes gridshift{
+    0%   { background-position: 0 0, 0 0; }
+    100% { background-position: 0 480px, 48px 0; }
+  }
+
+  /* --- Mise en page --- */
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 96px 28px 140px;
+    position: relative;
+  }
+
+  .eyebrow{
+    font-family: var(--font-display);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--accent);
+    text-align:center;
+    margin: 0 0 18px;
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-size: clamp(34px, 6vw, 54px);
+    text-align:center;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle{
+    text-align:center;
+    color: var(--ink-dim);
+    max-width: 480px;
+    margin: 0 auto 64px;
+    line-height:1.6;
+    font-size: 15px;
+  }
+
+  section.rule-block{
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(6px);
+    padding: 28px 30px;
+    margin-bottom: 22px;
+  }
+
+  section.rule-block h2{
+    font-family: var(--font-display);
+    font-size: 19px;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    margin: 0 0 12px;
+  }
+
+  section.rule-block h2 .tag{
+    font-size: 12px;
+    color: var(--accent);
+    border: 1px solid var(--accent-soft);
+    background: var(--accent-soft);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    letter-spacing: 0.05em;
+  }
+
+  section.rule-block p, section.rule-block li{
+    color: var(--ink-dim);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  section.rule-block ul{
+    margin: 8px 0 0;
+    padding-left: 20px;
+  }
+
+  a.rule-link{
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(142,203,255,0.35);
+    transition: border-color .15s ease, color .15s ease;
+    cursor: pointer;
+  }
+  a.rule-link:hover{
+    border-color: var(--accent);
+  }
+  a.rule-link:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  footer.note{
+    text-align:center;
+    color: var(--ink-dim);
+    font-size: 13px;
+    margin-top: 50px;
+    opacity: .7;
+  }
+
+  /* --- Modale de confirmation --- */
+  .overlay{
+    position: fixed;
+    inset:0;
+    background: rgba(2,2,6,0.72);
+    backdrop-filter: blur(3px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .18s ease;
+  }
+  .overlay.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .modal{
+    width: min(400px, 88vw);
+    background: #0b0b16;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 26px 22px;
+    transform: translateY(8px) scale(.97);
+    transition: transform .18s ease;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+  .overlay.open .modal{
+    transform: translateY(0) scale(1);
+  }
+
+  .modal h3{
+    font-family: var(--font-display);
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  .modal p{
+    color: var(--ink-dim);
+    font-size: 14px;
+    line-height:1.6;
+    margin: 0 0 6px;
+    word-break: break-word;
+  }
+
+  .modal .url{
+    display:block;
+    color: var(--accent);
+    font-size: 13px;
+    margin-bottom: 18px;
+    word-break: break-all;
+  }
+
+  .modal .actions{
+    display:flex;
+    gap: 10px;
+    justify-content:flex-end;
+  }
+
+  .btn{
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    cursor:pointer;
+  }
+  .btn.cancel:hover{
+    background: rgba(255,255,255,0.05);
+  }
+  .btn.confirm{
+    background: var(--accent);
+    color: #06101c;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .btn.confirm:hover{
+    filter: brightness(1.08);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .nebula, .stars, .grid{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage"></div>
+<div class="nebula"></div>
+<div class="stars"></div>
+<div class="grid"></div>
+
+<div class="wrap">
+  <p class="eyebrow">Serveur Discord</p>
+  <h1>Règlement</h1>
+  <p class="subtitle">Merci de lire l'ensemble des règles avant de participer. Elles s'appliquent à tous les membres, sans exception.</p>
+
+  <section class="rule-block">
+    <h2><span class="tag">01</span> Respect</h2>
+    <p>Aucune insulte, harcèlement ou discrimination ne sera toléré, que ce soit envers un membre ou un membre du staff. Les désaccords se règlent avec calme, jamais par l'agressivité.</p>
+  </section>
+
+  <section class="rule-block">
+    <h2><span class="tag">02</span> Contenu partagé</h2>
+    <p>Les contenus choquants, NSFW ou illégaux sont interdits dans tous les salons. Cela inclut les images, vidéos, liens et messages vocaux.</p>
+  </section>
+
+  <section class="rule-block">
+    <h2><span class="tag">03</span> Publicité</h2>
+    <p>La publicité pour d'autres serveurs, chaînes ou services n'est autorisée que dans le salon prévu à cet effet, et uniquement avec l'accord du staff.</p>
+  </section>
+
+  <section class="rule-block">
+    <h2><span class="tag">04</span> Liens externes</h2>
+    <p>Un lien peut être partagé s'il reste pertinent avec la discussion. Exemple de ressource officielle du serveur :
+      <a href="https://discord.com" class="rule-link">discord.com</a>.
+      Une confirmation vous sera toujours demandée avant l'ouverture.
+    </p>
+  </section>
+
+  <section class="rule-block">
+    <h2><span class="tag">05</span> Sanctions</h2>
+    <ul>
+      <li>1er avertissement : rappel à l'ordre</li>
+      <li>2e avertissement : mise en sourdine temporaire</li>
+      <li>3e avertissement : exclusion du serveur</li>
+    </ul>
+  </section>
+
+  <footer class="note">En restant sur ce serveur, vous acceptez ce règlement.</footer>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <h3 id="modal-title">Quitter le serveur ?</h3>
+    <p>Ce lien va vous rediriger en dehors de Discord :</p>
+    <span class="url" id="modal-url"></span>
+    <div class="actions">
+      <button class="btn cancel" id="cancelBtn">Annuler</button>
+      <button class="btn confirm" id="confirmBtn">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var overlay = document.getElementById('overlay');
+    var urlSpan = document.getElementById('modal-url');
+    var confirmBtn = document.getElementById('confirmBtn');
+    var cancelBtn = document.getElementById('cancelBtn');
+    var pendingUrl = null;
+
+    function openModal(url){
+      pendingUrl = url;
+      urlSpan.textContent = url;
+      overlay.classList.add('open');
+    }
+
+    function closeModal(){
+      overlay.classList.remove('open');
+      pendingUrl = null;
+    }
+
+    document.querySelectorAll('a.rule-link').forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        openModal(link.getAttribute('href'));
+      });
+    });
+
+    confirmBtn.addEventListener('click', function(){
+      if(pendingUrl){
+        window.open(pendingUrl, '_blank', 'noopener');
+      }
+      closeModal();
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+    });
+  })();
+</script>
+
+</body>
+</html>
+  .
